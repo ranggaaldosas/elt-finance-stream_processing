@@ -1,0 +1,27 @@
+finance:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: data-eng-study-421915
+      dataset: astro_team2
+      threads: 1 # Must be a value of 1 or greater
+      keyfile: /opt/airflow/include/dbt/finance/secret/sk_astro_team2.json
+      priority: interactive
+      job_execution_timeout_seconds: 300
+      job_retries: 1
+
+
+# Template gcp service account configuration
+# my-bigquery-db:
+#   target: dev
+#   outputs:
+#     dev:
+#       type: bigquery
+#       method: service-account
+#       project: GCP_PROJECT_ID
+#       dataset: DBT_DATASET_NAME
+#       threads: 4 # Must be a value of 1 or greater
+#       keyfile: /PATH/TO/BIGQUERY/keyfile.json
+#       OPTIONAL_CONFIG: VALUE

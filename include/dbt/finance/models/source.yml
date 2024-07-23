@@ -1,0 +1,26 @@
+# version: 2
+# sources:
+#   - name: finance_data
+#     schema: airbyte_dbt_alterra_de_batch2
+#     tables:
+#       - name: green_trip_data_2019_jan
+#   - name: northwind_lite_data
+#     schema: airbyte_dbt_alterra_de_batch2
+#     tables:
+#       - name: products
+#       - name: suppliers
+#       - name: inventory_transactions
+#       - name: orders
+#       - name: order_details
+
+# finance:
+#   target: dev
+#   outputs:
+#     dev:
+#       type: bigquery
+#       method: service-account
+#       project: data-eng-study-421915
+#       dataset: astro_team2
+#       threads: 1 # Must be a value of 1 or greater
+#       keyfile: /opt/airflow/include/dbt/finance/secret/sk_astro_team2.json
+#       OPTIONAL_CONFIG: VALUE
