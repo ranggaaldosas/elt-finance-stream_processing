@@ -25,3 +25,4 @@ finance:
 #       threads: 4 # Must be a value of 1 or greater
 #       keyfile: /PATH/TO/BIGQUERY/keyfile.json
 #       OPTIONAL_CONFIG: VALUE
+
