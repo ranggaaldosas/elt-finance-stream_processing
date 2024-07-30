@@ -1,3 +1,5 @@
+-- models/finance_staging.sql
+
 {{ config(materialized='table') }}
 
 SELECT

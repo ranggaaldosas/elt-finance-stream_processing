@@ -1,15 +1,17 @@
+import os
 from datetime import datetime
 from airflow.decorators import dag
 from airflow.providers.airbyte.operators.airbyte import AirbyteTriggerSyncOperator
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.bash import BashOperator
 
 @dag(
     start_date=datetime(2024, 5, 14),
-    schedule="@daily",
+    schedule_interval="@daily",
     catchup=False,
     tags=["airbyte", "airflow", "finance", "staging"],
 )
 def finance_staging_dag():
+    # Task untuk melakukan sinkronisasi data dengan Airbyte
     ingest_csv_to_pubsub = AirbyteTriggerSyncOperator(
         task_id="ingest_csv_to_pubsub",
         airbyte_conn_id="airbyte",
@@ -19,15 +21,19 @@ def finance_staging_dag():
         wait_seconds=3,
     )
 
-    def run_dbt_finance_staging():
-        import os
-        os.system("dbt run --select staging.finance_staging --profiles-dir /opt/airflow/include/dbt/finance --project-dir /opt/airflow/include/dbt/finance")
-
-    dbt_finance_staging_task = PythonOperator(
+    # Task untuk menjalankan model finance_staging DBT
+    dbt_finance_staging_task = BashOperator(
         task_id="run_dbt_finance_staging",
-        python_callable=run_dbt_finance_staging,
+        bash_command="dbt run --select finance_staging --profiles-dir /opt/airflow/include/dbt/finance --project-dir /opt/airflow/include/dbt/finance",
     )
 
-    ingest_csv_to_pubsub >> dbt_finance_staging_task
+    # Task untuk menjalankan model finance_dwh DBT
+    dbt_finance_dwh_task = BashOperator(
+        task_id="run_dbt_finance_dwh",
+        bash_command="dbt run --select finance_dwh --profiles-dir /opt/airflow/include/dbt/finance --project-dir /opt/airflow/include/dbt/finance",
+    )
+
+    # Definisi urutan eksekusi tasks
+    ingest_csv_to_pubsub >> dbt_finance_staging_task >> dbt_finance_dwh_task
 
 finance_staging_dag()
