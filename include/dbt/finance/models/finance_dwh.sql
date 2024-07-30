@@ -13,6 +13,7 @@ SELECT
   CAST(REPLACE(REPLACE(JSON_EXTRACT_SCALAR(to_json_string(t), '$.last_price'), '"', ''), ',', '') AS FLOAT64) AS last_price,
   CAST(REPLACE(REPLACE(JSON_EXTRACT_SCALAR(to_json_string(t), '$.change_value'), '"', ''), '%', '') AS FLOAT64) AS change_value,
   CAST(REPLACE(REPLACE(JSON_EXTRACT_SCALAR(to_json_string(t), '$.temp_market_cap'), '"', ''), ',', '') AS INT64) AS temp_market_cap,
-  REPLACE(JSON_EXTRACT_SCALAR(to_json_string(t), '$.market_cap'), '"', '') AS market_cap
+  REPLACE(JSON_EXTRACT_SCALAR(to_json_string(t), '$.market_cap'), '"', '') AS market_cap,
+  REPLACE(JSON_EXTRACT_SCALAR(to_json_string(t), '$.country_of_origin'), '"', '') AS country_of_origin
 FROM
   {{ ref('finance_staging') }} t

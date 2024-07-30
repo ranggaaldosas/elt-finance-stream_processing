@@ -10,7 +10,7 @@ from airflow.operators.bash import BashOperator
     catchup=False,
     tags=["airbyte", "airflow", "finance", "staging"],
 )
-def finance_staging_dag():
+def finance_stream_batch_processing():
     # Task untuk melakukan sinkronisasi data dengan Airbyte
     ingest_csv_to_pubsub = AirbyteTriggerSyncOperator(
         task_id="ingest_csv_to_pubsub",
@@ -36,4 +36,4 @@ def finance_staging_dag():
     # Definisi urutan eksekusi tasks
     ingest_csv_to_pubsub >> dbt_finance_staging_task >> dbt_finance_dwh_task
 
-finance_staging_dag()
+finance_stream_batch_processing()

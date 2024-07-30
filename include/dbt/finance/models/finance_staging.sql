@@ -13,7 +13,8 @@ SELECT
   parsed_data.last_price,
   parsed_data.`change` AS change_value,
   parsed_data.temp_market_cap,
-  parsed_data.market_cap
+  parsed_data.market_cap,
+  parsed_data.country_of_origin
 FROM
   {{ ref('finance_raw') }},
   UNNEST([STRUCT(
@@ -27,5 +28,6 @@ FROM
     SAFE.PARSE_JSON(data)._airbyte_data.last_price AS last_price,
     SAFE.PARSE_JSON(data)._airbyte_data.`change` AS `change`,
     SAFE.PARSE_JSON(data)._airbyte_data.temp_market_cap AS temp_market_cap,
-    SAFE.PARSE_JSON(data)._airbyte_data.market_cap AS market_cap
+    SAFE.PARSE_JSON(data)._airbyte_data.market_cap AS market_cap,
+    SAFE.PARSE_JSON(data)._airbyte_data.country_of_origin AS country_of_origin
   )]) AS parsed_data
