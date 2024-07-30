@@ -20,4 +20,5 @@
 ![dwh](./assets/Screenshot_180.png)
 ![dwh](./assets/bigquery_dwh.png)
 
-#### D. Dashboard
+#### D. Temporary Dashboard (soon to be updated)
+![dwh](./assets/metabase_dashboard.png)
