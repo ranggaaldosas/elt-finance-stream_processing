@@ -32,7 +32,7 @@ def send_discord_embed(title: str, description: str, color: str, fields: dict, w
 def send_start_notification():
     webhook_url = Variable.get("DISCORD_SUCCESS_WEBHOOK_URL")
     title = "Airflow Notification"
-    description = "Captain Hook: The finance_stream_batch_processing DAG has started."
+    description = "Airflow Started ✅ -> The finance_stream_batch_processing DAG has started."
     fields = {
         "Start Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
@@ -42,7 +42,7 @@ def send_start_notification():
 def send_success_notification():
     webhook_url = Variable.get("DISCORD_SUCCESS_WEBHOOK_URL")
     title = "Airflow Notification"
-    description = "Captain Hook: The finance_stream_batch_processing DAG has completed successfully."
+    description = "Airflow Succes ✅ The finance_stream_batch_processing DAG has completed successfully."
     fields = {
         "Completion Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
@@ -64,7 +64,7 @@ def send_failure_notification(context):
         error_message = "Some error that cannot be extracted has occurred. Visit the logs!"
 
     title = "Airflow Alert - Task has failed!"
-    description = "Captain Hook: The finance_stream_batch_processing DAG has failed."
+    description = "Airflow Failure ⛔ _>The finance_stream_batch_processing DAG has failed."
     fields = {
         "DAG": dag_name,
         "Task": task_name,
