@@ -40,4 +40,4 @@ DISCORD_SUCCESS_WEBHOOK_URL = Variable.get("DISCORD_SUCCESS_WEBHOOK_URL")
 DISCORD_FAILURE_WEBHOOK_URL = Variable.get("DISCORD_FAILURE_WEBHOOK_URL")
 ```
 
-![dwh](./assets)
+![dwh](./assets/airflow_alert.png)

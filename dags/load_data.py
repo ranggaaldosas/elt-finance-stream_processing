@@ -1,47 +1,94 @@
 import os
-import requests
-from datetime import datetime
+import re
+from datetime import datetime, timedelta
 from airflow.decorators import dag
 from airflow.providers.airbyte.operators.airbyte import AirbyteTriggerSyncOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.models import Variable
+from discord_webhook import DiscordWebhook, DiscordEmbed
 import logging
+from typing import Optional
+from airflow.models.taskinstance import TaskInstance
 
-# Retrieve webhook URLs from Airflow variables
-DISCORD_SUCCESS_WEBHOOK_URL = Variable.get("DISCORD_SUCCESS_WEBHOOK_URL")
-DISCORD_FAILURE_WEBHOOK_URL = Variable.get("DISCORD_FAILURE_WEBHOOK_URL")
+logging.basicConfig(level=logging.INFO)
 
-def send_discord_notification(message: str, webhook_url: str):
-    if not webhook_url:
-        raise ValueError("The webhook URL is not set.")
+def send_discord_embed(title: str, description: str, color: str, fields: dict, webhook_url: str):
     try:
-        data = {
-            "content": message,
-        }
-        response = requests.post(webhook_url, json=data)
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Failed to send notification to Discord: {e}")
-        raise
-
-def send_failure_notification(context):
-    execution_date = context.get('execution_date')
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    message = f"Captain Hook: The finance_stream_batch_processing DAG has failed at {current_time}. Execution date was {execution_date}."
-    send_discord_notification(message, DISCORD_FAILURE_WEBHOOK_URL)
+        webhook = DiscordWebhook(url=webhook_url)
+        embed = DiscordEmbed(
+            title=title,
+            description=description,
+            color=color
+        )
+        for name, value in fields.items():
+            embed.add_embed_field(name=name, value=value, inline=False)
+        webhook.add_embed(embed)
+        response = webhook.execute()
+        logging.info(f"Discord notification sent: {response.status_code}, {response.content}")
+    except Exception as e:
+        logging.error(f"Failed to send Discord notification: {e}")
 
 def send_start_notification():
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    message = f"Captain Hook: The finance_stream_batch_processing DAG has started at {current_time}."
-    send_discord_notification(message, DISCORD_SUCCESS_WEBHOOK_URL)
+    webhook_url = Variable.get("DISCORD_SUCCESS_WEBHOOK_URL")
+    title = "Airflow Notification"
+    description = "Captain Hook: The finance_stream_batch_processing DAG has started."
+    fields = {
+        "Start Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    logging.info(f"Sending start notification to {webhook_url}")
+    send_discord_embed(title, description, '00FF00', fields, webhook_url)
 
 def send_success_notification():
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    message = f"Captain Hook: The finance_stream_batch_processing DAG has completed successfully at {current_time}."
-    send_discord_notification(message, DISCORD_SUCCESS_WEBHOOK_URL)
+    webhook_url = Variable.get("DISCORD_SUCCESS_WEBHOOK_URL")
+    title = "Airflow Notification"
+    description = "Captain Hook: The finance_stream_batch_processing DAG has completed successfully."
+    fields = {
+        "Completion Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    logging.info(f"Sending success notification to {webhook_url}")
+    send_discord_embed(title, description, '00FF00', fields, webhook_url)
+
+def send_failure_notification(context):
+    webhook_url = Variable.get("DISCORD_FAILURE_WEBHOOK_URL")
+    last_task: Optional[TaskInstance] = context.get('task_instance')
+    task_name = last_task.task_id
+    dag_name = last_task.dag_id
+    log_link = last_task.log_url
+    execution_date = context.get('execution_date')
+
+    try:
+        error_message = str(context["exception"])
+        error_message = error_message[:1000] + (error_message[1000:] and '...')
+    except:
+        error_message = "Some error that cannot be extracted has occurred. Visit the logs!"
+
+    title = "Airflow Alert - Task has failed!"
+    description = "Captain Hook: The finance_stream_batch_processing DAG has failed."
+    fields = {
+        "DAG": dag_name,
+        "Task": task_name,
+        "Execution Date": execution_date.isoformat() if execution_date else "N/A",
+        "Error": error_message,
+        "Log URL": log_link
+    }
+    logging.info(f"Sending failure notification to {webhook_url}")
+    send_discord_embed(title, description, 'FF0000', fields, webhook_url)
+
+default_args = {
+    'owner': 'airflow',
+    'start_date': datetime.strptime("2022-04-11 20:00:00", "%Y-%m-%d %H:%M:%S"),
+    'email': [],
+    'email_on_failure': True,
+    'email_on_retry': False,
+    'retries': 0,
+    'retry_delay': timedelta(minutes=0),
+    'depends_on_past': False,
+    'on_failure_callback': send_failure_notification
+}
 
 @dag(
+    default_args=default_args,
     start_date=datetime(2024, 5, 14),
     schedule_interval="@daily",
     catchup=False,
