@@ -11,7 +11,7 @@
 
 
 #### A. System Design
-![system_design](./assets/system_design.png)
+![system_design](./assets/system_pipeline.png)
 
 #### B. Airflow Graph
 ![flow](./assets/airflow_graph.png)
