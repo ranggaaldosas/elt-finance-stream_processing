@@ -22,3 +22,22 @@
 
 #### D. Temporary Dashboard (soon to be updated)
 ![dwh](./assets/metabase_dashboard.png)
+
+#### E. Discord Notification Webhook Integration
+1. Airflow Dashboard -> Admin -> Add Variables
+
+OR with CLI
+
+```bash
+airflow variables set DISCORD_SUCCESS_WEBHOOK_URL "https://discord.com/api/webhooks/xxxxx"
+airflow variables set DISCORD_FAILURE_WEBHOOK_URL "https://discord.com/api/webhooks/xxxxx"
+```
+
+2. Add to DAG
+
+```py
+DISCORD_SUCCESS_WEBHOOK_URL = Variable.get("DISCORD_SUCCESS_WEBHOOK_URL")
+DISCORD_FAILURE_WEBHOOK_URL = Variable.get("DISCORD_FAILURE_WEBHOOK_URL")
+```
+
+![dwh](./assets)
